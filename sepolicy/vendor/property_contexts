@@ -1,2 +1,28 @@
 # Fingerprint
 ro.vendor.fp.driver u:object_r:vendor_fingerprint_prop:s0
+
+# Camera3 pipeline buffer-count tuning and a few other camera-specific
+# properties that device/mediatek/sepolicy_vndr's property_contexts never
+# assigned a type to (they were falling through to the generic
+# vendor_default_prop bucket, which mtk_hal_camera has no read access to -
+# confirmed live via AVC denials: "avc: denied { read } ...
+# scontext=u:r:mtk_hal_camera:s0 tcontext=u:object_r:default_prop:s0" during
+# a real camera session, 61 occurrences). mtk_hal_camera already has full
+# get_prop/set_prop access to vendor_mtk_camera_prop (see mtk_hal_camera.te),
+# same type its many sibling camera properties already use in the shared
+# MediaTek property_contexts.
+persist.vendor.camera3.pipeline.bufnum. u:object_r:vendor_mtk_camera_prop:s0
+ro.vendor.camera.insensorzoom.support   u:object_r:vendor_mtk_camera_prop:s0
+ro.vendor.camera.isp.support.colorspace u:object_r:vendor_mtk_camera_prop:s0
+ro.vendor.camera3.zsl.default           u:object_r:vendor_mtk_camera_prop:s0
+vendor.camera.mdp.                      u:object_r:vendor_mtk_camera_prop:s0
+
+# Same gap for two vdec (video decoder) properties - vpud_native has no
+# access to vendor_default_prop either (confirmed live: 9-12 denials per
+# session on { read } scontext=u:r:vpud_native:s0
+# tcontext=u:object_r:default_prop:s0). vendor_mtk_video_prop is the type
+# already used for sibling vdec/c2 properties in the shared MediaTek
+# property_contexts (see vendor.mtk.c2.vdec.fmt.disabled.whitelist); granted
+# to vpud_native in vpud_native.te alongside this change.
+vendor.mtk.vdec.decode.error.handle.mode u:object_r:vendor_mtk_video_prop:s0
+vendor.mtk.vdec.waitkeyframeforplay      u:object_r:vendor_mtk_video_prop:s0

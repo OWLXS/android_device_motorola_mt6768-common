@@ -1,0 +1,35 @@
+# Misc early-boot/vendor AVC denials observed live on device, same root
+# cause as the wakeup-source ones in genfs_contexts: this device tree wasn't
+# paired with AlphaDroid's own device/alpha sepolicy.
+#
+# NOTE: mediaserver/vendor_default_prop, rild/default_prop, rild/system_file,
+# vold/persist_data_file, and fsck/block_device were all also observed
+# denied, but every attempt to grant them - even narrowed down to the exact
+# single permission that was denied - hits a hard system/sepolicy neverallow
+# (block_device raw access, vendor-into-/system Treble boundary,
+# vold-into-persist restriction, core property file access). Those are
+# deliberate AOSP hardening, not gaps, so left denied on purpose.
+
+# make_f2fs/fsck.f2fs read mmcblk0's sysfs block-device info at boot to
+# determine partition geometry before checking/creating the filesystem.
+allow e2fs sysfs_devices_block:dir search;
+allow fsck sysfs_devices_block:dir search;
+
+# ePDG (VoWiFi tunnel) issues an interface-index ioctl on its own UDP
+# socket as part of tunnel setup.
+allow epdg_wod self:udp_socket ioctl;
+
+# init creates /dev/socket/bip (Bluetooth Imaging Profile) itself while
+# parsing a vendor .rc "socket bip ..." service directive; the target
+# resolves to the generic socket_device type at creation time (the more
+# specific bip_socket type from device/mediatek/sepolicy_vndr's
+# file_contexts only applies on later access/relabel, not this creation).
+allow init socket_device:sock_file create;
+
+# fuelgauged_nvram reads board-id/hw config out of the devicetree "android"
+# firmware node at boot (separate from the sysfs_batteryinfo access it
+# already has via device/mediatek/sepolicy_vndr). Needs both dir search AND
+# file read - the "compatible" file inside it was still denied with only
+# dir search granted.
+allow fuelgauged_nvram sysfs_dt_firmware_android:dir search;
+allow fuelgauged_nvram sysfs_dt_firmware_android:file r_file_perms;

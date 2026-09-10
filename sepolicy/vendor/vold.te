@@ -1,0 +1,5 @@
+# Regulatory-label partition: see file.te for why it needs its own type.
+# vendor_init already has dir read/file setattr (vendor_init.te); vold also
+# probes it directly (mount-point enumeration at boot). Needs "open" as well
+# as "read" - opendir() checks both separately.
+allow vold elabel_data_file:dir { open read };

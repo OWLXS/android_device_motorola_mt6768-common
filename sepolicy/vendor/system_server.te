@@ -1,0 +1,10 @@
+# CachedAppOptimizer (system_server thread that manages cached-app
+# freezing/compaction) searches /proc/irq as part of its optimization
+# passes; denied on this device tree since it wasn't paired with
+# AlphaDroid's own device/alpha sepolicy. Likely contributor to the
+# periodic OomAdjuster StrictMode DiskReadViolation churn observed live.
+# Lives here (not ../private/system_server.te): proc_irq is declared by
+# MediaTek's vendor sepolicy (device/mediatek/sepolicy_vndr), and
+# system_ext/private policy compiles before vendor policy - referencing a
+# vendor type from private fails with "unknown type" at build time.
+allow system_server proc_irq:dir search;

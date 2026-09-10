@@ -1,0 +1,5 @@
+# system/sepolicy's own webview_zygote.te grants { read getattr } on
+# zygote_tmpfs but not the separate "map" permission mmap() needs -
+# webview_zygote couldn't mmap the shared ART boot-image memfd
+# ("/memfd:/boot-image-methods.art (deleted)") without it.
+allow webview_zygote zygote_tmpfs:file map;

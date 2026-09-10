@@ -3,3 +3,19 @@ type vendor_sysfs_audio, fs_type, sysfs_type;
 
 # Fingerprint
 type vendor_sysfs_fingerprint, fs_type, sysfs_type;
+
+# Electronic regulatory label partition (/mnt/elabel). Stock Motorola
+# firmware labels this partition with its own "elabel_data_file" type that
+# our policy never declared, so it shows up as raw/unlabeled here (observed
+# live: vendor_init denied setattr/read on it at boot) since fastboot -w
+# doesn't wipe this partition and it keeps whatever labels stock left on
+# it. Declaring the same type name lets restorecon actually relabel it to
+# something our policy recognizes instead of leaving it unlabeled forever.
+# Plain file_type only, NOT data_file_type - this is its own read-only OEM
+# partition (mmcblk0p50), not actual /data content, and data_file_type
+# would drag in system/sepolicy's coredomain-vs-data-partition neverallow
+# (blocks vold's dir read on it, confirmed live: "neverallow ... violated
+# by allow vold elabel_data_file:dir { read }" at domain.te full_treble_only
+# block, since vold is a coredomain and elabel_data_file isn't one of the
+# sanctioned core/app/vendor data categories).
+type elabel_data_file, file_type;

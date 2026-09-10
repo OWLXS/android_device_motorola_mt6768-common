@@ -1,1 +1,14 @@
 set_prop(vendor_init, vendor_fingerprint_prop)
+
+# Misc early-boot AVC denials observed live on device, same root cause as
+# the rest of this file: this device tree wasn't paired with AlphaDroid's
+# own device/alpha sepolicy.
+# NOTE: debugfs_mmc:file setattr, plain debugfs:file write, and
+# vendor_userdir_file:dir write were also observed denied, but all three
+# hit system/sepolicy's enforce_debugfs_restriction / vold.te neverallows
+# (deliberate AOSP hardening), so left denied on purpose.
+allow vendor_init debugfs_bootreceiver_tracing:dir write;
+allow vendor_init debugfs_tracing_instances:file create;
+# Regulatory-label partition: see file.te for why it needs its own type.
+allow vendor_init elabel_data_file:dir read;
+allow vendor_init elabel_data_file:file setattr;

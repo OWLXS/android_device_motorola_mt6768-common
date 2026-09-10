@@ -1,3 +1,6 @@
 # Fingerprint
 /vendor/bin/hw/android\.hardware\.biometrics\.fingerprint-service\.example              u:object_r:hal_fingerprint_default_exec:s0
 /vendor/bin/hw/android\.hardware\.biometrics\.fingerprint-service\.gf                   u:object_r:hal_fingerprint_default_exec:s0
+
+# Electronic regulatory label partition
+/mnt/elabel(/.*)?                                                                       u:object_r:elabel_data_file:s0

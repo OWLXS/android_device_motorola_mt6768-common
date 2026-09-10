@@ -1,0 +1,22 @@
+# Allow system_app (e.g. SystemUI's AsyncTask threads) to reach these HALs.
+# Denied on this device tree since it wasn't paired with AlphaDroid's own
+# device/alpha sepolicy (we used LineageOS's device tree instead), tracked
+# via repeated system_app binder-call AVC denials observed live on device.
+# Lives here (not ../private/system_app.te) because these HAL types are
+# vendor-declared, and system_ext/private policy compiles before vendor
+# policy - referencing a vendor type from private fails with "unknown type"
+# at build time.
+allow system_app hal_audio_default:binder call;
+allow system_app mtk_hal_bluetooth:binder call;
+allow system_app hal_bootctl_default:binder call;
+allow system_app hal_keymint_default:binder call;
+allow system_app mtk_hal_memtrack:binder call;
+allow system_app hal_health_default:binder call;
+allow system_app hal_graphics_composer_default:binder call;
+allow system_app hal_gnss_default:binder call;
+allow system_app hal_gatekeeper_default:binder call;
+allow system_app mtk_hal_camera:binder call;
+allow system_app hal_vibrator_default:binder call;
+allow system_app mtk_hal_usb:binder call;
+allow system_app hal_thermal_default:binder call;
+allow system_app hal_sensors_default:binder call;

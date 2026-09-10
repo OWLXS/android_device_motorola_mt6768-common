@@ -1,0 +1,15 @@
+# GMS Core polls adbd_prop (USB debugging state) periodically; denied on
+# this device tree since it wasn't paired with AlphaDroid's own device/alpha
+# sepolicy (we used LineageOS's device tree instead). get_prop(), not
+# r_file_perms: the latter includes ioctl/lock, which system/sepolicy's own
+# neverallow forbids on property files (private/property.te says as much:
+# "likely the policy is using r_file_perms directly instead of get_prop()").
+get_prop(gmscore_app, adbd_prop)
+
+# NOTE: gmscore_app was also observed denied "setattr" on its own
+# self-downloaded Dynamite/GmsCoreVic split APKs (e.g. AdsDynamite) right
+# after install - tried granting apk_data_file:file setattr, but that hits
+# system/sepolicy's private/app.te:638-640 neverallow (only "platform_app",
+# not regular appdomain members like gmscore_app, may setattr apk_data_file
+# - deliberate hardening against apps tampering with installed APK files),
+# so left denied on purpose.

@@ -1,0 +1,24 @@
+# vpud_native (device/mediatek/sepolicy_vndr) has get_prop for
+# vendor_mtk_sec_video_path_support_prop and a couple of thermal props, but
+# never got access to vendor_mtk_video_prop - the type two of its own
+# properties (vendor.mtk.vdec.decode.error.handle.mode,
+# vendor.mtk.vdec.waitkeyframeforplay) are now assigned to in
+# property_contexts (see that file's comment) after they were found falling
+# through to the unreadable generic default_prop bucket. mediacodec and
+# mtk_hal_power already read this same type, so this isn't a new/unusual
+# grant for a video-adjacent vendor domain.
+get_prop(vpud_native, vendor_mtk_video_prop)
+
+# Both properties above are actually set at boot from
+# device/motorola/mt6768-common/vendor.prop by vendor_init - moving them out
+# of the generic default_prop/vendor_default_prop bucket broke that SET,
+# since vendor_init had no grant for the new, more specific
+# vendor_mtk_video_prop type (unlike its sibling
+# vendor_mtk_sec_video_path_support_prop, which it already had set_prop for).
+# Confirmed live: both properties read back empty after boot, and dmesg
+# showed "avc: denied { set } for property=vendor.mtk.vdec.*
+# scontext=u:r:vendor_init:s0 tcontext=u:object_r:vendor_mtk_video_prop:s0"
+# for both. Without this, the read-access fix above is pointless - vpud_native
+# could read the property type, but the property itself was never being set
+# to its configured value (3 / 11) in the first place.
+set_prop(vendor_init, vendor_mtk_video_prop)

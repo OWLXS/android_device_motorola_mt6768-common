@@ -30,6 +30,7 @@ genfscon sysfs /devices/platform/1100d000.i2c/i2c-6/6-004a/tcpc/type_c_port0/wak
 genfscon sysfs /devices/platform/1100d000.i2c/i2c-6/6-004a/wakeup                                                                      u:object_r:sysfs_wakeup:s0
 genfscon sysfs /devices/platform/1100f000.i2c/i2c-3/3-0029/wakeup                                                                      u:object_r:sysfs_wakeup:s0
 genfscon sysfs /devices/platform/11012000.spi2/spi_master/spi2/spi2.0/omnivision_tcm.0/wakeup                                          u:object_r:sysfs_wakeup:s0
+genfscon sysfs /devices/platform/11012000.spi2/spi_master/spi2/spi2.0/wakeup                                                           u:object_r:sysfs_wakeup:s0
 genfscon sysfs /devices/platform/15020000.imgsys_config/wakeup                                                                         u:object_r:sysfs_wakeup:s0
 genfscon sysfs /devices/platform/18002000.consys/wakeup                                                                                u:object_r:sysfs_wakeup:s0
 genfscon sysfs /devices/platform/battery-manager/power_supply/battery/wakeup                                                           u:object_r:sysfs_wakeup:s0
