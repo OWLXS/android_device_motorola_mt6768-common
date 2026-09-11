@@ -22,3 +22,33 @@ get_prop(vpud_native, vendor_mtk_video_prop)
 # could read the property type, but the property itself was never being set
 # to its configured value (3 / 11) in the first place.
 set_prop(vendor_init, vendor_mtk_video_prop)
+
+# Secure video path (SVP): vpud_native (the H264/VP9 secure decode daemon,
+# vdec_srv thread in v3avpud-64b) allocates protected-memory buffers via
+# DMA-BUF Heaps for DRM-protected content (Widevine L1). Denied on this
+# device tree for the same reason as everything else in this file - never
+# paired with device/alpha's own sepolicy. Confirmed live via AVC denial:
+# "avc: denied { read } ... name="mtk_svp_region-aligned" ...
+# scontext=u:r:vpud_native:s0 tcontext=u:object_r:dmabuf_system_secure_heap_device:s0
+# tclass=chr_file" - without this, MtkH264SecVdec_AllocateDma/DmabufHeapAlloc
+# fails for every requested size, the secure decode session never gets its
+# buffers, and the codec crashes with a null pointer a few calls later
+# trying to use the (never allocated) buffer handle. r_file_perms_no_map
+# matches the grant mtk_hal_camera already has for this same type
+# (device/mediatek/sepolicy_vndr/base/vendor/mtk_hal_camera.te) - the real
+# mmap happens on the dma-buf fd the heap ioctl returns, not on this device
+# node itself.
+allow vpud_native dmabuf_system_secure_heap_device:chr_file r_file_perms_no_map;
+
+# vpud_native (vdec_srv thread) also touches the plain, non-secure system
+# DMA-BUF heap (/dev/dma_heap/mtk_mm) alongside the secure one above -
+# likely a companion/metadata buffer that isn't itself protected content
+# even during an otherwise-secure decode session. Denied for the same
+# reason as everything else in this file. Confirmed live via AVC denial:
+# "avc: denied { read } for comm='vdec_srv' name='mtk_mm' ...
+# scontext=u:r:vpud_native:s0 tcontext=u:object_r:dmabuf_system_heap_device:s0
+# tclass=chr_file" - unlike the secure heap above, mtk_hal_c2,
+# hal_graphics_allocator_default and vtservice all read this type with
+# plain r_file_perms (not _no_map), so matching that established local
+# convention rather than the secure-heap one.
+allow vpud_native dmabuf_system_heap_device:chr_file r_file_perms;

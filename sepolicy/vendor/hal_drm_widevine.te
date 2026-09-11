@@ -1,0 +1,20 @@
+# hal_drm_widevine (the widevine DRM HAL daemon) probes GenieZone's kernel
+# device node at startup as part of establishing whether a hardware/GZ-based
+# secure content path is available - denied on this device tree for the
+# same reason as everything else in this file - never paired with
+# device/alpha's own sepolicy. Confirmed live via AVC denial:
+# "avc: denied { read write } ... comm="android.hardwar" name="gz_kree"
+# ... scontext=u:r:hal_drm_widevine:s0 tcontext=u:object_r:gz_device:s0
+# tclass=chr_file" - fired once, right at hal_drm_widevine's own startup,
+# before any app even requested a DRM session.
+#
+# This is a plausible contributor to the still-open GenieZone/KREE ioctl
+# failure (MTEE_CMD_GET_CHM_HANDLE / commandId=80 tlRet=1, see
+# kernellamu-axion-svp-video-seguro memory, Bug 3): if the widevine HAL
+# itself can never open /dev/gz_kree, whatever capability check it runs
+# there at init could plausibly be why L1 either isn't offered or fails
+# once negotiated. vpud_native and mtk_hal_camera already have this same
+# grant for this same type (device/mediatek/sepolicy_vndr/base/vendor/
+# vpud_native.te, mtk_hal_camera.te) - rw_file_perms matches both, and
+# matches exactly the { read write } this denial requested.
+allow hal_drm_widevine gz_device:chr_file rw_file_perms;
