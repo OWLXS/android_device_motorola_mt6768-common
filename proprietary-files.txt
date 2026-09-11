@@ -125,6 +125,7 @@ vendor/lib64/libgpud.so
 vendor/lib64/libgralloc_extra.so
 vendor/lib64/libgralloc_metadata.so
 vendor/lib64/libgralloctypes_mtk.so
+vendor/lib64/libgz_gp_client.so
 vendor/lib64/libgz_uree.so
 vendor/lib64/libion_mtk.so
 vendor/lib64/libion_ulit.so
@@ -285,6 +286,9 @@ vendor/etc/vintf/manifest/android.hardware.security.sharedsecret-service.truston
 # Media
 vendor/bin/v3avpud-64b
 vendor/etc/init/v3avpud-64b.rc
+vendor/lib64/AVCSecureVdecCA.so
+vendor/lib64/VP9SecureVdecCA.so
+vendor/lib64/libAVCSecureVencCA.so
 vendor/lib64/libHEVCdec_sa.ca7.android.so
 vendor/lib64/libh264dec_customize.so
 vendor/lib64/libh264dec_sa.ca7.so
