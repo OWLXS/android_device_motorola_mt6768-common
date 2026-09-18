@@ -4,3 +4,6 @@
 
 # Electronic regulatory label partition
 /mnt/elabel(/.*)?                                                                       u:object_r:elabel_data_file:s0
+
+# MediaTek power stub (mtkpower/)
+/vendor/bin/hw/vendor\.mediatek\.hardware\.mtkpower-service\.stub  u:object_r:hal_mtkpower_stub_exec:s0

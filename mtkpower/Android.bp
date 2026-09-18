@@ -1,0 +1,56 @@
+//
+// SPDX-FileCopyrightText: The LineageOS Project
+// SPDX-License-Identifier: Apache-2.0
+//
+
+// Named ".stub" rather than after the package so it does not collide with the
+// cc_prebuilt_library_shared of the same interface that already ships the
+// client side (vendor.mediatek.hardware.mtkpower-V1-ndk, from
+// proprietary-files.txt). The package inside the .aidl is still the real one,
+// and that is what binder matches on, so the prebuilt client and this
+// source-built server talk to each other.
+aidl_interface {
+    name: "vendor.mediatek.hardware.mtkpower.stub",
+    vendor: true,
+    srcs: ["aidl/vendor/mediatek/hardware/mtkpower/*.aidl"],
+    local_include_dir: "aidl",
+    stability: "vintf",
+    owner: "motorola",
+    frozen: true,
+    backend: {
+        cpp: {
+            enabled: false,
+        },
+        java: {
+            enabled: false,
+        },
+        ndk: {
+            enabled: true,
+        },
+    },
+    versions_with_info: [
+        {
+            version: "1",
+            imports: [],
+        },
+    ],
+
+}
+
+cc_binary {
+    name: "vendor.mediatek.hardware.mtkpower-service.stub",
+    relative_install_path: "hw",
+    vendor: true,
+    init_rc: ["mtkpower-service-lamu.rc"],
+    vintf_fragments: ["mtkpower-service-lamu.xml"],
+    srcs: ["service.cpp"],
+    shared_libs: [
+        "libbase",
+        "libbinder_ndk",
+        "liblog",
+        "libutils",
+    ],
+    static_libs: [
+        "vendor.mediatek.hardware.mtkpower.stub-V1-ndk",
+    ],
+}

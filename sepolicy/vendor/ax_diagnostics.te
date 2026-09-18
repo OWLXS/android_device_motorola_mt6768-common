@@ -1,0 +1,53 @@
+#
+# SPDX-FileCopyrightText: The LineageOS Project
+# SPDX-License-Identifier: Apache-2.0
+#
+
+# MTK-specific sysfs access for ax_diagnostics (device/axion/common only ships
+# a vendor/qcom variant of this policy; there is no BOARD_USES_MTK_HARDWARE
+# equivalent upstream, so this lives here instead). Without these the app
+# silently gets EACCES on every one of these nodes and reports 0/unknown for
+# per-core frequency, thermal, RTC, battery and TEE stats even though the
+# underlying kernel data is present and correct.
+allow ax_diagnostics sysfs_therm:dir r_dir_perms;
+allow ax_diagnostics sysfs_therm:file r_file_perms;
+allow ax_diagnostics sysfs_rtc:dir r_dir_perms;
+allow ax_diagnostics sysfs_rtc:file r_file_perms;
+allow ax_diagnostics mtee_trusty_file:dir r_dir_perms;
+allow ax_diagnostics mtee_trusty_file:file r_file_perms;
+allow ax_diagnostics sysfs_dvfsrc_dbg:dir r_dir_perms;
+allow ax_diagnostics sysfs_dvfsrc_dbg:file r_file_perms;
+allow ax_diagnostics sysfs_vbus:dir r_dir_perms;
+allow ax_diagnostics sysfs_vbus:file r_file_perms;
+allow ax_diagnostics sysfs_cache_status:dir r_dir_perms;
+allow ax_diagnostics sysfs_cache_status:file r_file_perms;
+allow ax_diagnostics sysfs_camera_max_bw_v2:dir r_dir_perms;
+allow ax_diagnostics sysfs_camera_max_bw_v2:file r_file_perms;
+allow ax_diagnostics sysfs_dt_firmware_android:dir r_dir_perms;
+allow ax_diagnostics sysfs_dt_firmware_android:file r_file_perms;
+allow ax_diagnostics sysfs_emi_ctrl_concurrency_scenario:dir r_dir_perms;
+allow ax_diagnostics sysfs_emi_ctrl_concurrency_scenario:file r_file_perms;
+allow ax_diagnostics sysfs_extcon:dir r_dir_perms;
+allow ax_diagnostics sysfs_extcon:file r_file_perms;
+allow ax_diagnostics sysfs_fs_chg_file:dir r_dir_perms;
+allow ax_diagnostics sysfs_fs_chg_file:file r_file_perms;
+allow ax_diagnostics sysfs_headset:dir r_dir_perms;
+allow ax_diagnostics sysfs_headset:file r_file_perms;
+allow ax_diagnostics sysfs_keypad_file:dir r_dir_perms;
+allow ax_diagnostics sysfs_keypad_file:file r_file_perms;
+allow ax_diagnostics sysfs_mtk_fpsgo:dir r_dir_perms;
+allow ax_diagnostics sysfs_mtk_fpsgo:file r_file_perms;
+allow ax_diagnostics sysfs_mtk_mmqos_scen_v2:dir r_dir_perms;
+allow ax_diagnostics sysfs_mtk_mmqos_scen_v2:file r_file_perms;
+allow ax_diagnostics sysfs_pmu:dir r_dir_perms;
+allow ax_diagnostics sysfs_pmu:file r_file_perms;
+allow ax_diagnostics sysfs_pump_express:dir r_dir_perms;
+allow ax_diagnostics sysfs_pump_express:file r_file_perms;
+allow ax_diagnostics sysfs_sensor:dir r_dir_perms;
+allow ax_diagnostics sysfs_sensor:file r_file_perms;
+allow ax_diagnostics sysfs_usb_nonplat:dir r_dir_perms;
+allow ax_diagnostics sysfs_usb_nonplat:file r_file_perms;
+allow ax_diagnostics sys_mt6577_auxadc:dir r_dir_perms;
+allow ax_diagnostics sys_mt6577_auxadc:file r_file_perms;
+allow ax_diagnostics teei_control_file:dir r_dir_perms;
+allow ax_diagnostics teei_control_file:file r_file_perms;

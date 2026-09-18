@@ -1,0 +1,28 @@
+#
+# SPDX-FileCopyrightText: The LineageOS Project
+# SPDX-License-Identifier: Apache-2.0
+#
+
+# Domain for the mtkpower stub service (device/motorola/mt6768-common/mtkpower).
+# It exists purely so libcam.hal3a.v3.so finds the service instead of sitting in
+# libbinder's 5 second service wait on every still capture.
+#
+# Deliberately does NOT declare a service type of its own: the upstream MediaTek
+# policy already labels this exact service, in
+# device/mediatek/sepolicy_vndr/base/vendor/service_contexts:
+#
+#   vendor.mediatek.hardware.mtkpower.IMtkPowerService/default u:object_r:hal_power_service:s0
+#
+# Adding a second label for the same service name is a hard build failure
+# ("Multiple different specifications for ..."), so the stub joins the existing
+# hal_power attribute pair instead. That one line below is all it takes: AOSP's
+# system/sepolicy/private/hal_power.te already wires up everything else —
+# add_service and client find via hal_attribute_service, binder_call in both
+# directions between hal_power_client and hal_power_server, and binder_call to
+# servicemanager. mtk_hal_camera (camerahalserver, the caller this exists for)
+# is already a hal_power_client upstream, so it needs no grant here either.
+type hal_mtkpower_stub, domain;
+type hal_mtkpower_stub_exec, exec_type, vendor_file_type, file_type;
+init_daemon_domain(hal_mtkpower_stub)
+
+hal_server_domain(hal_mtkpower_stub, hal_power)

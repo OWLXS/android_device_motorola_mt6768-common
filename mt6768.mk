@@ -212,6 +212,14 @@ PRODUCT_COPY_FILES += \
 PRODUCT_PACKAGES += \
     vendor.mediatek.hardware.mtkpower@1.0.vendor
 
+# Answers vendor.mediatek.hardware.mtkpower.IMtkPowerService, which stock serves
+# from the same process as android.hardware.power but libperfmgr above does not
+# implement. Without it libcam.hal3a.v3.so spends a flat 5s per still capture in
+# libbinder's service wait. The stub only registers; the actual governor work
+# stays with libperfmgr so the two never fight over the same knobs.
+PRODUCT_PACKAGES += \
+    vendor.mediatek.hardware.mtkpower-service.stub
+
 # Properties
 include hardware/mediatek/configs/properties/vendor_logtag.mk
 

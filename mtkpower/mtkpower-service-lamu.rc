@@ -1,0 +1,5 @@
+service vendor.mtkpower-stub /vendor/bin/hw/vendor.mediatek.hardware.mtkpower-service.stub
+    class hal
+    user system
+    group system
+    shutdown critical

@@ -1,0 +1,11 @@
+# <physical cluster size in bytes> <extended regex on the path inside the image>
+# 0 stores the file uncompressed.
+#
+# Code that the runtime mmaps directly: dex/odex/oat/vdex/art via ART, .so via
+# the linker, apk (dex and native libs inside are stored, not deflated). Every
+# page-in from a compressed EROFS extent costs an LZ4 pass and a copy; on a 4 GB
+# device under zram pressure those page-ins are constant. Plain storage lets the
+# page cache be served straight from the block layer. apex images are already
+# compressed internally (EROFS measured 100% on stock), so compressing them only
+# burns CPU.
+0 .*\.(apk|so|jar|dex|oat|odex|vdex|art|apex)$

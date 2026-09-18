@@ -1,0 +1,19 @@
+//
+// Copyright (C) 2026 The LineageOS Project
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+
+cc_library_static {
+    name: "lib_driver_cmd_mt66xx",
+    srcs: ["driver_cmd_nl80211.c"],
+    header_libs: [
+        "wpa_supplicant_headers",
+    ],
+    cflags: [
+        "-Werror",
+        "-Wno-unused-parameter",
+        "-Wno-macro-redefined",
+    ],
+    soc_specific: true,
+}
