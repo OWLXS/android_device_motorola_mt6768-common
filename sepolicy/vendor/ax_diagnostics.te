@@ -51,3 +51,11 @@ allow ax_diagnostics sys_mt6577_auxadc:dir r_dir_perms;
 allow ax_diagnostics sys_mt6577_auxadc:file r_file_perms;
 allow ax_diagnostics teei_control_file:dir r_dir_perms;
 allow ax_diagnostics teei_control_file:file r_file_perms;
+
+# /sys/class/devfreq itself (not the vendor_sysfs_mali_devfreq-labelled
+# node under it - see ax_kernel_manager.te): GpuInfo.kt scans this
+# directory by name to find the Mali entry, since its address varies
+# per SoC and the app cannot hardcode it the way the 3 Qualcomm fallback
+# paths already there do.
+allow ax_diagnostics sysfs_devfreq_dir:dir r_dir_perms;
+allow ax_diagnostics sysfs_devfreq_dir:lnk_file r_file_perms;
