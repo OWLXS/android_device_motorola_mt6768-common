@@ -246,7 +246,7 @@ ro.surface_flinger.game_default_frame_rate_override=60
 ro.surface_flinger.has_HDR_display=false
 ro.surface_flinger.max_frame_buffer_acquired_buffers=3
 ro.surface_flinger.primary_display_orientation=ORIENTATION_0
-ro.surface_flinger.supports_background_blur=0
+ro.surface_flinger.supports_background_blur=1
 vendor.sf.hwc_repaint_fmt=3
 
 # TEE
