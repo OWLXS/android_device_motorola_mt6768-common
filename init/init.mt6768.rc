@@ -689,6 +689,17 @@ on boot
     chmod 0660 /sys/devices/system/cpu/cpufreq/policy0/scaling_governor
     chown system system /sys/devices/system/cpu/cpufreq/policy6/scaling_governor
     chmod 0660 /sys/devices/system/cpu/cpufreq/policy6/scaling_governor
+    # GPU devfreq governor: unlike scaling_governor above, the kernel gives
+    # this node no Android-specific ownership at all (root:root 0644,
+    # confirmed live). CPU min/max freq still work for system_server without
+    # this treatment because those go through PowerManagerInternal's node
+    # ceiling (a privileged path with its own access), but governor writes
+    # are a plain FileUtils.stringToFile() from AxKernelManagerService with
+    # no such indirection - confirmed live too: sepolicy alone (see
+    # ax_kernel_manager.te) was not enough, system_server still got EACCES
+    # from bare DAC until this file was chowned like scaling_governor is.
+    chown system system /sys/class/devfreq/13040000.mali/governor
+    chmod 0660 /sys/class/devfreq/13040000.mali/governor
     chown root   system /sys/kernel/debug/binder/transaction_log_enable
     chown root   system /sys/kernel/debug/binder/perf_evalue
     chown system system /sys/devices/system/cpu/rq-stats/htasks_thresh
