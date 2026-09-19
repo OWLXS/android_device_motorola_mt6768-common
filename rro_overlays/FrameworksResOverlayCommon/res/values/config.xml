@@ -10,9 +10,15 @@
 
     <!-- Minimum screen brightness setting allowed by power manager.
          -2 is invalid so setting will resort to int value specified above.
-         Set this to 0.0 to allow screen to go to minimal brightness.
-         The user is forbidden from setting the brightness below this level. -->
-    <dimen name="config_screenBrightnessSettingMinimumFloat">0.0</dimen>
+         The user is forbidden from setting the brightness below this level.
+         NOTE: kept above 0.0 on purpose. The backlight LED driver
+         (drivers/leds/leds-mtk.c, mtk_set_hw_brightness()) only floors a
+         NONZERO brightness value to min-hw-brightness (1, from lamu.dtso);
+         an input of exactly 0 skips that floor and is treated as "turn
+         off", not "dimmest". 0.0 here let the manual slider reach that
+         exact 0 at the bottom of its travel, cutting the backlight
+         instead of just dimming further. -->
+    <dimen name="config_screenBrightnessSettingMinimumFloat">0.01</dimen>
 
     <!-- Maximum screen brightness allowed by the power manager.
          -2 is invalid so setting will resort to int value specified above.
