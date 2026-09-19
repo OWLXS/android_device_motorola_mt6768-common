@@ -1,0 +1,21 @@
+# Axion's AxMemoryManager (axion_sdk/ax_memory_server) lowers vm.swappiness
+# for latency-sensitive foreground apps (applySwappinessTuning(), camera apps
+# get SWAPPINESS_GAMING=60 instead of the default 100). It does that by
+# setting persist.sys.ax_mem.swappiness, which system/core/rootdir/init.rc
+# turns into a write to /proc/sys/vm/swappiness.
+#
+# That write runs as init, but MediaTek labels /proc/sys/vm/swappiness as
+# proc_swappiness (device/mediatek/sepolicy_vndr/base/vendor/{file,genfs_contexts})
+# and only grants it to vendor_init, so the trigger was denied and the whole
+# per-app tuning was silently inert - confirmed live on device:
+#   avc: denied { write } for comm="init" name="swappiness"
+#   scontext=u:r:init:s0 tcontext=u:object_r:proc_swappiness:s0
+# The boot-time write in init.mt6768.rc kept working only because that one
+# runs as vendor_init.
+#
+# Mirroring the trigger into a vendor init script instead is not an option:
+# vendor_init only reads properties granted by explicit get_prop() rules and
+# has none for system_prop, which is what persist.sys.ax_mem.swappiness is.
+# Granting init this one proc type follows the existing pattern in
+# system/sepolicy/private/init.te (proc_drop_caches, proc_pressure_mem).
+allow init proc_swappiness:file w_file_perms;
