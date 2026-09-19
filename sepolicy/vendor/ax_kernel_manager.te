@@ -1,0 +1,28 @@
+# Axion kernel manager on MediaTek. device/axion/common only ships the
+# Qualcomm rules (sepolicy/vendor/qcom/ax_kernel_manager.te, vendor_sysfs_kgsl
+# and vendor_sysfs_devfreq); the CPU side works here anyway because AOSP core
+# policy already lets system_server write sysfs_devices_system_cpu, but the
+# GPU devfreq node was plain sysfs and every write was denied:
+#   W AxKernelManager: ErrnoException: open failed: EACCES (Permission denied)
+#   avc: denied { getattr } for comm="android.hardwar" path=".../13040000.mali/max_freq"
+#        scontext=u:r:hal_power_default:s0 tcontext=u:object_r:sysfs:s0
+# The node is now vendor_sysfs_mali_devfreq (file.te / genfs_contexts).
+
+# AxKernelManagerService writes min_freq/max_freq/governor via FileUtils.
+allow system_server vendor_sysfs_mali_devfreq:dir r_dir_perms;
+allow system_server vendor_sysfs_mali_devfreq:file rw_file_perms;
+allow system_server vendor_sysfs_mali_devfreq:lnk_file read;
+
+# notifyPowerManager() -> PowerManagerInternal.setNodeCeiling() hands the same
+# path to the PowerHAL.
+allow hal_power_default vendor_sysfs_mali_devfreq:dir r_dir_perms;
+allow hal_power_default vendor_sysfs_mali_devfreq:file rw_file_perms;
+
+# Boot-time defaults from init.mt6768.rc (governor + polling_interval).
+allow vendor_init vendor_sysfs_mali_devfreq:dir r_dir_perms;
+allow vendor_init vendor_sysfs_mali_devfreq:file w_file_perms;
+
+# AxDiagnostics' GPU tab reads cur_freq/available_frequencies/load. It could
+# read the node while it was plain sysfs; keep that working after the relabel.
+allow ax_diagnostics vendor_sysfs_mali_devfreq:dir r_dir_perms;
+allow ax_diagnostics vendor_sysfs_mali_devfreq:file r_file_perms;

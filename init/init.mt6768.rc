@@ -174,6 +174,19 @@ on late-fs
     write /sys/kernel/tracing/trace_marker "E"
     write /proc/bootprof "INIT:Mount_END --late"
 
+# GPU DVFS defaults. MediaTek's default "dummy" devfreq governor defers to
+# the proprietary GED DVFS, which reacts too slowly for bursty UI work: with
+# window blurs on, SystemUI sat at 18% janky frames (99th pct 150ms) because
+# the GPU was still at a low OPP when the frame arrived. simple_ondemand with
+# a short polling interval brought that to 7% (99th 73ms), close to pinning
+# the GPU at max (4.6%) but still clocking down at idle; the timer is
+# deferrable so it does not wake an idle CPU. Runs at "on boot" so that a
+# governor the user picked in the kernel manager (restored later, at
+# system_server's systemReady) still wins over this default.
+on boot
+    write /sys/class/devfreq/13040000.mali/governor simple_ondemand
+    write /sys/class/devfreq/13040000.mali/polling_interval 10
+
 on post-fs-data
     write /proc/bootprof "INIT:post-fs-data"
     wait_for_prop vendor.all.modules.ready 1

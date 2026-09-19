@@ -19,3 +19,12 @@ type vendor_sysfs_fingerprint, fs_type, sysfs_type;
 # block, since vold is a coredomain and elabel_data_file isn't one of the
 # sanctioned core/app/vendor data categories).
 type elabel_data_file, file_type;
+
+# GPU devfreq node (/sys/devices/platform/13040000.mali/devfreq/13040000.mali,
+# reached via the /sys/class/devfreq symlink). MediaTek leaves it as plain
+# sysfs, which no core domain may write, so Axion's kernel manager could not
+# apply GPU min/max/governor here (system_server got EACCES, confirmed live)
+# and its PowerHAL ceiling notification was denied too. Mirrors what
+# device/axion/common does for Qualcomm with vendor_sysfs_devfreq. See
+# ax_kernel_manager.te for the consumers.
+type vendor_sysfs_mali_devfreq, fs_type, sysfs_type;
