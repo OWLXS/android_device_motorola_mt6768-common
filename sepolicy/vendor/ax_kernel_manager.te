@@ -26,3 +26,20 @@ allow vendor_init vendor_sysfs_mali_devfreq:file w_file_perms;
 # read the node while it was plain sysfs; keep that working after the relabel.
 allow ax_diagnostics vendor_sysfs_mali_devfreq:dir r_dir_perms;
 allow ax_diagnostics vendor_sysfs_mali_devfreq:file r_file_perms;
+
+# gpufreqv2 fix_target_opp_index (proc_gpufreqv2, defined upstream in
+# device/mediatek/sepolicy_vndr): the devfreq governor above is a no-op on
+# this legacy/non-GPUEB driver, so AxKernelManagerService now pins the real
+# OPP index here instead. system_server already has dir search on
+# proc_gpufreqv2 from core policy, just needed the file grant. vendor_init's
+# chown/chmod in init.mt6768.rc and hal_power_default's read/write (for
+# powerhint.json's GpuPwrLevel node) are already covered by existing rules.
+allow system_server proc_gpufreqv2:file rw_file_perms;
+
+# Boot-time chown/chmod from init.mt6768.rc (see the mali devfreq block
+# above for why: driver-created nodes default to root:root, unreachable by
+# system_server's "system" uid without this). Explicit instead of relying
+# on whatever lets the mali devfreq chown above work, since that type is
+# sysfs_type and this one is proc_type - not necessarily the same rule.
+allow vendor_init proc_gpufreqv2:dir r_dir_perms;
+allow vendor_init proc_gpufreqv2:file setattr;

@@ -710,6 +710,8 @@ on boot
     chmod 0660 /sys/class/devfreq/13040000.mali/min_freq
     chown system system /sys/class/devfreq/13040000.mali/max_freq
     chmod 0660 /sys/class/devfreq/13040000.mali/max_freq
+    chown system system /proc/gpufreqv2/fix_target_opp_index
+    chmod 0660 /proc/gpufreqv2/fix_target_opp_index
     chown root   system /sys/kernel/debug/binder/transaction_log_enable
     chown root   system /sys/kernel/debug/binder/perf_evalue
     chown system system /sys/devices/system/cpu/rq-stats/htasks_thresh
