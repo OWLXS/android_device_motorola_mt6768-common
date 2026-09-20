@@ -721,6 +721,14 @@ on boot
     # slider reappear immediately.
     chown system system /proc/gpufreqv2/gpu_working_opp_table
     chmod 0660 /proc/gpufreqv2/gpu_working_opp_table
+    # GED's gpu_utilization node defaults to root:root 0440 - AxDiagnostics
+    # (ax_diagnostics domain, runs as uid system) has sepolicy read access
+    # to sysfs_ged already, but DAC alone still blocks it (same class of
+    # bug as the gpufreqv2 nodes above). Confirmed live: chown alone made
+    # AxDiagnostics' GPU tab go from blank to reporting the real value
+    # (27%/796MHz), no reboot needed.
+    chown root system /sys/kernel/ged/hal/gpu_utilization
+    chmod 0440 /sys/kernel/ged/hal/gpu_utilization
     chown root   system /sys/kernel/debug/binder/transaction_log_enable
     chown root   system /sys/kernel/debug/binder/perf_evalue
     chown system system /sys/devices/system/cpu/rq-stats/htasks_thresh
