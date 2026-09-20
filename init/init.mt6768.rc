@@ -712,6 +712,15 @@ on boot
     chmod 0660 /sys/class/devfreq/13040000.mali/max_freq
     chown system system /proc/gpufreqv2/fix_target_opp_index
     chmod 0660 /proc/gpufreqv2/fix_target_opp_index
+    # gpu_working_opp_table is read-only for the UI (freq list for the
+    # slider labels), but defaults to root:root like the other gpufreqv2
+    # nodes - system_server can't even read it without this, which makes
+    # AxKernelConfigLoader.addGpuOppIndexIfPresent() find an empty table and
+    # silently drop the whole GPU group from the Kernel Manager screen.
+    # Confirmed live on device: chown alone (no reboot needed) makes the
+    # slider reappear immediately.
+    chown system system /proc/gpufreqv2/gpu_working_opp_table
+    chmod 0660 /proc/gpufreqv2/gpu_working_opp_table
     chown root   system /sys/kernel/debug/binder/transaction_log_enable
     chown root   system /sys/kernel/debug/binder/perf_evalue
     chown system system /sys/devices/system/cpu/rq-stats/htasks_thresh
