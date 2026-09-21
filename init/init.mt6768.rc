@@ -712,6 +712,13 @@ on boot
     chmod 0660 /sys/class/devfreq/13040000.mali/max_freq
     chown system system /proc/gpufreqv2/fix_target_opp_index
     chmod 0660 /proc/gpufreqv2/fix_target_opp_index
+    # axion_gpu_range (LIMIT_AXION_USER min/max range limiter) defaults to
+    # root:root like every other gpufreqv2 debug node here - system_server
+    # gets EACCES writing it without this, same class of bug as the nodes
+    # above. Confirmed live: chown+chmod alone (no reboot) let the write
+    # through immediately.
+    chown system system /proc/gpufreqv2/axion_gpu_range
+    chmod 0660 /proc/gpufreqv2/axion_gpu_range
     # gpu_working_opp_table is read-only for the UI (freq list for the
     # slider labels), but defaults to root:root like the other gpufreqv2
     # nodes - system_server can't even read it without this, which makes
