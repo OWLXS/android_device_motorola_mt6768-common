@@ -174,19 +174,6 @@ on late-fs
     write /sys/kernel/tracing/trace_marker "E"
     write /proc/bootprof "INIT:Mount_END --late"
 
-# GPU DVFS defaults. MediaTek's default "dummy" devfreq governor defers to
-# the proprietary GED DVFS, which reacts too slowly for bursty UI work: with
-# window blurs on, SystemUI sat at 18% janky frames (99th pct 150ms) because
-# the GPU was still at a low OPP when the frame arrived. simple_ondemand with
-# a short polling interval brought that to 7% (99th 73ms), close to pinning
-# the GPU at max (4.6%) but still clocking down at idle; the timer is
-# deferrable so it does not wake an idle CPU. Runs at "on boot" so that a
-# governor the user picked in the kernel manager (restored later, at
-# system_server's systemReady) still wins over this default.
-on boot
-    write /sys/class/devfreq/13040000.mali/governor simple_ondemand
-    write /sys/class/devfreq/13040000.mali/polling_interval 10
-
 on post-fs-data
     write /proc/bootprof "INIT:post-fs-data"
     wait_for_prop vendor.all.modules.ready 1
@@ -689,53 +676,6 @@ on boot
     chmod 0660 /sys/devices/system/cpu/cpufreq/policy0/scaling_governor
     chown system system /sys/devices/system/cpu/cpufreq/policy6/scaling_governor
     chmod 0660 /sys/devices/system/cpu/cpufreq/policy6/scaling_governor
-    # GPU devfreq nodes: unlike CPU's scaling_governor above, the kernel
-    # gives these no Android-specific ownership at all (root:root 0644,
-    # confirmed live). AxKernelManagerService writes governor via a plain
-    # FileUtils.stringToFile() with no privileged indirection - system_server
-    # (UID system, not root) got a bare DAC EACCES even with sepolicy fully
-    # correct (see ax_kernel_manager.te) until this file was chowned like
-    # scaling_governor is.
-    #
-    # min_freq/max_freq ALSO need this, which was unexpected: they additionally
-    # go through PowerManagerInternal.setNodeCeiling() (a PowerHAL binder call,
-    # in notifyPowerManager()), so the working theory was that path alone would
-    # cover them without touching ownership here - it doesn't, confirmed live
-    # the same way as governor (chown fixed it, tested before committing).
-    # Whatever the PowerHAL ceiling call actually does on this platform, the
-    # visible sysfs value only followed the picker once these were chowned too.
-    chown system system /sys/class/devfreq/13040000.mali/governor
-    chmod 0660 /sys/class/devfreq/13040000.mali/governor
-    chown system system /sys/class/devfreq/13040000.mali/min_freq
-    chmod 0660 /sys/class/devfreq/13040000.mali/min_freq
-    chown system system /sys/class/devfreq/13040000.mali/max_freq
-    chmod 0660 /sys/class/devfreq/13040000.mali/max_freq
-    chown system system /proc/gpufreqv2/fix_target_opp_index
-    chmod 0660 /proc/gpufreqv2/fix_target_opp_index
-    # axion_gpu_range (LIMIT_AXION_USER min/max range limiter) defaults to
-    # root:root like every other gpufreqv2 debug node here - system_server
-    # gets EACCES writing it without this, same class of bug as the nodes
-    # above. Confirmed live: chown+chmod alone (no reboot) let the write
-    # through immediately.
-    chown system system /proc/gpufreqv2/axion_gpu_range
-    chmod 0660 /proc/gpufreqv2/axion_gpu_range
-    # gpu_working_opp_table is read-only for the UI (freq list for the
-    # slider labels), but defaults to root:root like the other gpufreqv2
-    # nodes - system_server can't even read it without this, which makes
-    # AxKernelConfigLoader.addGpuOppIndexIfPresent() find an empty table and
-    # silently drop the whole GPU group from the Kernel Manager screen.
-    # Confirmed live on device: chown alone (no reboot needed) makes the
-    # slider reappear immediately.
-    chown system system /proc/gpufreqv2/gpu_working_opp_table
-    chmod 0660 /proc/gpufreqv2/gpu_working_opp_table
-    # GED's gpu_utilization node defaults to root:root 0440 - AxDiagnostics
-    # (ax_diagnostics domain, runs as uid system) has sepolicy read access
-    # to sysfs_ged already, but DAC alone still blocks it (same class of
-    # bug as the gpufreqv2 nodes above). Confirmed live: chown alone made
-    # AxDiagnostics' GPU tab go from blank to reporting the real value
-    # (27%/796MHz), no reboot needed.
-    chown root system /sys/kernel/ged/hal/gpu_utilization
-    chmod 0440 /sys/kernel/ged/hal/gpu_utilization
     chown root   system /sys/kernel/debug/binder/transaction_log_enable
     chown root   system /sys/kernel/debug/binder/perf_evalue
     chown system system /sys/devices/system/cpu/rq-stats/htasks_thresh
