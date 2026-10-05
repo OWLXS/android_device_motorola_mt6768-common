@@ -45,6 +45,14 @@ on init
     write /proc/sys/net/core/wmem_max 8388608
     write /proc/sys/net/core/rmem_max 8388608
 
+# lamu: switch TCP congestion control from cubic (kernel default) to BBR.
+# Kernel already has it compiled in (CONFIG_TCP_CONG_BBR=y), just never
+# activated anywhere in this tree. fq qdisc is BBR's recommended pairing
+# (also already compiled in, CONFIG_NET_SCH_FQ=y) -- without it BBR still
+# works but falls back to the default qdisc's pacing. 04/10.
+    write /proc/sys/net/core/default_qdisc fq
+    write /proc/sys/net/ipv4/tcp_congestion_control bbr
+
 # update cpus for cpuset cgroup
     write /dev/cpuset/foreground/cpus 0-7
     write /dev/cpuset/foreground/boost/cpus 0-7
@@ -121,12 +129,55 @@ on fs
     mount iso9660 loop@/vendor/etc/iAmCdRom.iso /mnt/cd-rom ro
 
 # TN modify for ZRAM function
+#
+# lamu: switched from lz4 to zstd (2026-10-03). zstd has a meaningfully
+# better compression ratio than lz4 on Android anon memory, which matters
+# more here than lz4's faster decompression, because lmkd's
+# swap_compression_ratio tuning (see device/motorola/lamu/system.prop)
+# depends on the real ratio of whatever algorithm is actually configured.
+# Tradeoff: zstd decompression is slower than lz4, and zram decompression
+# sits on the swap-in page-fault path, so this does cost some latency
+# when paging back in a backgrounded app. Not measured on real hardware
+# yet.
+#
+# Considered CONFIG_ZRAM_MULTI_COMP (lz4 primary + zstd as a recompress
+# target for idle pages only) as a way to get zstd's ratio without paying
+# the decompression cost on every swap-in. Decided against it: our 6.6
+# zram/zcomp does not support per-algorithm compression levels, so
+# recompressing a page that is already zstd with zstd again buys nothing
+# -- multi-comp only helps when the primary and secondary are genuinely
+# different algorithms, and we have nothing better-ratio than zstd
+# available. Plain zstd-as-primary it is.
 on property:sys.boot_completed=1
-    write /sys/block/zram0/comp_algorithm lz4
+    write /sys/block/zram0/comp_algorithm zstd
     write /proc/sys/vm/page-cluster 0
     write /proc/sys/vm/swappiness 100
     write /sys/kernel/mm/swap/vma_ra_enabled false
     swapon_all /vendor/etc/fstab.enableswap
+
+    # lamu: touch_boost floors by default to -1 (disabled) in
+    # touch_boost_init() -- drivers/misc/mediatek/performance/touch_boost/
+    # touch_boost.c. The driver already self-triggers on every input event
+    # via its own input_handler + hrtimer (TOUCH_TIMEOUT_MS=100ms), so this
+    # is a one-shot config, not something that needs to run per-touch.
+    # Index 0 = highest OPP, higher index = lower OPP (table is sorted
+    # descending in cpu_policy_init()). cluster_0 = little (A53, 16 OPPs,
+    # 500-1800MHz), cluster_1 = big (A75, 16 OPPs, 850-2000MHz).
+    # idx5=1325MHz (~74% fmax) / idx6=1621MHz (~81% fmax) -- starting point,
+    # not a stock reference value (none exists in the extracted vendor
+    # blobs), tune with scripts/ui-bench if it feels off.
+    write /proc/touch_boost/boost_opp_cluster_0 5
+    write /proc/touch_boost/boost_opp_cluster_1 6
+
+    # lamu: DAMON_RECLAIM (mm/damon/reclaim.c) finds anonymous pages that
+    # have gone untouched for a while and proactively reclaims them before
+    # real memory pressure hits. Ships disabled (static bool enabled =
+    # false); everything else -- quota (10ms/128MiB per 1s, age-weighted),
+    # watermarks (active only between 20% and 50% free-mem-rate, backs off
+    # both when memory is plentiful and when it's already critical) and
+    # monitoring intervals -- already has sane upstream defaults, so this
+    # is the only thing actually missing.
+    write /sys/module/damon_reclaim/parameters/enabled Y
 
 on post-fs
     write /proc/bootprof "INIT:post-fs"
@@ -333,8 +384,9 @@ on post-fs-data
     chown audioserver audio /sys/bus/platform/devices/rt5509_param.1/prop_param
     chown audioserver audio /sys/bus/platform/devices/mt6660-param.0/prop_params
 
-    #AAudio Boost
-    write /dev/stune/rt/schedtune.boost 30
+    # lamu: AAudio Boost via schedtune removed -- schedtune doesn't exist
+    # in kernel 6.6 (cgroup v1 cpu controller extension, replaced by
+    # uclamp/sched_ext in this kernel), dead config. 04/10.
 
     #Accdet
     chown root radio /sys/devices/platform/Accdet_Driver/driver/accdet_call_state
