@@ -141,6 +141,11 @@ TARGET_VENDOR_PROP += $(COMMON_PATH)/vendor.prop
 
 # SEPolicy
 include device/mediatek/sepolicy_vndr/SEPolicy.mk
+
+# lamu: LineageOS requires this included explicitly (not automatic via
+# LINEAGE_BUILD/device/lineage/sepolicy/common) for the ADPF sepolicy
+# (mlstrustedsubject/setsched) that hal_power_default.te below grants.
+include device/lineage/sepolicy/libperfmgr/sepolicy.mk
 BOARD_VENDOR_SEPOLICY_DIRS += $(COMMON_PATH)/sepolicy/vendor
 
 # Verified Boot

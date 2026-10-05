@@ -1,0 +1,22 @@
+# lamu: ADPF (Android Dynamic Performance Framework) support for the Power
+# HAL. Ported from hardware/google/pixel-sepolicy/power-libperfmgr -- only
+# the ADPF-specific subset (mlstrustedsubject + setsched on
+# appdomain/surfaceflinger/HWC/system_server); the rest of that upstream
+# file uses Pixel-only types we don't have. Tested live via ksud sepolicy
+# patch on the old pre-A17 tree: zero AVC denied, ADPF hint session created
+# successfully (dumpsys performance_hint -> Hint Session Support: true).
+# Ported to A17 04/10, not yet re-confirmed live on this kernel.
+typeattribute hal_power_default mlstrustedsubject;
+
+# Set scheduling info for apps (for adpf)
+allow hal_power_default appdomain:process { getsched setsched };
+allow hal_power_default self:capability sys_nice;
+
+# Set scheduling info for surfaceflinger (for adpf)
+allow hal_power_default surfaceflinger:process setsched;
+
+# Set scheduling info for HWC (for adpf)
+allow hal_power_default hal_graphics_composer_default:process setsched;
+
+# Set scheduling info for system_server (for adpf)
+allow hal_power_default system_server:process setsched;
