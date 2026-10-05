@@ -193,6 +193,15 @@ persist.vendor.mtk_wfc_support=1
 persist.vendor.radio.msimmode=dsds
 persist.vendor.radio.mtk_dsbp_support=2
 persist.vendor.radio.smart.data.switch=1
+# lamu: re-enabled 04/10 -- vtservice used to crash-loop at runtime because
+# libsink-mtk.so was built against an older libaudioclient AudioTrack ABI
+# (missing AttributionSourceState param) that could not be resolved at
+# runtime, even though the build-time allow_undefined_symbols workaround let
+# the blob link. Real fix (same approach as upstream lineage-24.0's "Shim
+# libsink-mtk" commit): libsink-mtk.so now depends on libaudioclient_shim
+# (hardware/lineage/compat), which implements the old ABI on top of the new
+# libaudioclient. Not yet confirmed on a real boot -- revert to 0 if
+# vtservice still crash-loops.
 persist.vendor.vilte_support=1
 persist.vendor.viwifi_support=1
 persist.vendor.volte_support=1

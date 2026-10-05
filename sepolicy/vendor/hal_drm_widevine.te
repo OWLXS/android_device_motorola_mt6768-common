@@ -1,0 +1,13 @@
+# hal_drm_widevine (the widevine DRM HAL daemon) probes GenieZone's kernel
+# device node at startup as part of establishing whether a hardware/GZ-based
+# secure content path is available. Confirmed via AVC denial on the old
+# lineage-23.2 tree (same hardware): "avc: denied { read write } ...
+# comm="android.hardwar" name="gz_kree" ...
+# scontext=u:r:hal_drm_widevine:s0 tcontext=u:object_r:gz_device:s0
+# tclass=chr_file" -- fired once, right at hal_drm_widevine's own startup,
+# before any app even requested a DRM session. vpud_native and
+# mtk_hal_camera already have this same grant for this same type
+# (device/mediatek/sepolicy_vndr/base/vendor/vpud_native.te,
+# mtk_hal_camera.te) -- rw_file_perms matches both. Ported to the A17 tree
+# 04/10, not yet re-confirmed live on this kernel.
+allow hal_drm_widevine gz_device:chr_file rw_file_perms;

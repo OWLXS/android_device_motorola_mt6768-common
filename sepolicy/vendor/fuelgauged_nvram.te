@@ -1,0 +1,6 @@
+# lamu: fuelgauged_nvram is missing search permission on
+# sysfs_dt_firmware_android upstream (device/mediatek/sepolicy_vndr) --
+# other MTK domains that read NVRAM calibration data (em_svr, kpoc_charger,
+# meta_tst) already have it, this one never got added. Confirmed via dmesg
+# avc denial, 04/10.
+allow fuelgauged_nvram sysfs_dt_firmware_android:dir search;

@@ -1,1 +1,9 @@
 set_prop(vendor_init, vendor_fingerprint_prop)
+
+# lamu: init.mt6768.rc writes the real touch_boost OPP indices here
+# (boost_opp_cluster_0/1) -- upstream device/mediatek sepolicy only grants
+# this proc type to mtk_hal_power/system_server, not vendor_init, so the
+# write was silently denied and the tunable stayed inert. Confirmed via
+# dmesg avc denial, 04/10.
+allow vendor_init proc_touch_boost:dir r_dir_perms;
+allow vendor_init proc_touch_boost:file rw_file_perms;

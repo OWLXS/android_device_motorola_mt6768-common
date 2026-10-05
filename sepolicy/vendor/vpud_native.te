@@ -1,0 +1,29 @@
+# lamu: vdec_srv (video decoder service, runs as vpud_native) reads
+# /proc/.../thermal to adapt decode behavior under thermal pressure.
+# Denied -- confirmed via avc: denied { search } ... scontext=u:r:vpud_native
+# on a real boot, 04/10. No existing MTK device tree found with this exact
+# rule (checked several on GitHub, including another Motorola MTK device),
+# so likely config/firmware-revision specific to this one.
+allow vpud_native proc_thermal:dir search;
+
+# Secure video path (SVP): vpud_native (the H264/VP9 secure decode daemon,
+# vdec_srv thread in v3avpud-64b) allocates protected-memory buffers via
+# DMA-BUF Heaps for DRM-protected content (Widevine L1). Confirmed via AVC
+# denial on the old lineage-23.2 tree (same hardware): "avc: denied { read }
+# ... name="mtk_svp_region-aligned" ... scontext=u:r:vpud_native:s0
+# tcontext=u:object_r:dmabuf_system_secure_heap_device:s0 tclass=chr_file"
+# -- without this, MtkH264SecVdec_AllocateDma/DmabufHeapAlloc fails for
+# every requested size, the secure decode session never gets its buffers,
+# and the codec crashes with a null pointer a few calls later trying to use
+# the (never allocated) buffer handle. r_file_perms_no_map matches the
+# grant mtk_hal_camera already has for this same type. Ported 04/10, not
+# yet re-confirmed live on this kernel.
+allow vpud_native dmabuf_system_secure_heap_device:chr_file r_file_perms_no_map;
+
+# vpud_native (vdec_srv thread) also touches the plain, non-secure system
+# DMA-BUF heap (/dev/dma_heap/mtk_mm) alongside the secure one above --
+# likely a companion/metadata buffer that is not itself protected content
+# even during an otherwise-secure decode session. mtk_hal_c2,
+# hal_graphics_allocator_default and vtservice all read this type with
+# plain r_file_perms (not _no_map), matching that established convention.
+allow vpud_native dmabuf_system_heap_device:chr_file r_file_perms;
