@@ -107,12 +107,18 @@ BOARD_SUPER_PARTITION_GROUPS := motorola_dynamic_partitions
 
 BOARD_ODMIMAGE_FILE_SYSTEM_TYPE := erofs
 BOARD_ODM_DLKMIMAGE_FILE_SYSTEM_TYPE := erofs
-BOARD_PRODUCTIMAGE_FILE_SYSTEM_TYPE := ext4
-BOARD_SYSTEMIMAGE_FILE_SYSTEM_TYPE := ext4
+BOARD_PRODUCTIMAGE_FILE_SYSTEM_TYPE := erofs
+BOARD_SYSTEMIMAGE_FILE_SYSTEM_TYPE := erofs
 BOARD_SYSTEM_DLKMIMAGE_FILE_SYSTEM_TYPE := erofs
-BOARD_SYSTEM_EXTIMAGE_FILE_SYSTEM_TYPE := ext4
+BOARD_SYSTEM_EXTIMAGE_FILE_SYSTEM_TYPE := erofs
 BOARD_VENDORIMAGE_FILE_SYSTEM_TYPE := erofs
 BOARD_VENDOR_DLKMIMAGE_FILE_SYSTEM_TYPE := erofs
+
+# Compressao maxima (microLZMA, nivel 9) em todas as particoes erofs acima.
+# Precisa de CONFIG_EROFS_FS_ZIP_LZMA=y no kernel pra montar (decode mais
+# pesado que lz4hc, mas EROFS_FS_PCPU_KTHREAD_HIPRI ja roda em kthread
+# dedicado de alta prioridade, o que amortece o custo).
+BOARD_EROFS_COMPRESSOR := lzma,9
 
 TARGET_COPY_OUT_ODM := odm
 TARGET_COPY_OUT_ODM_DLKM := odm_dlkm
