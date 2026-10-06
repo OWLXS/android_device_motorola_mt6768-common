@@ -169,6 +169,17 @@ on property:sys.boot_completed=1
     write /proc/touch_boost/boost_opp_cluster_0 5
     write /proc/touch_boost/boost_opp_cluster_1 6
 
+    # lamu: background blur (ro.surface_flinger.supports_background_blur=1
+    # in vendor.prop) forces GPU composition for the blur pass, and the
+    # MTK default GPU devfreq governor ("dummy", delegates to GED) reacts
+    # too slowly for a scroll/pulldown animation -- measured live
+    # (dumpsys gfxinfo, 10x status bar pulls): dummy = 18.2% jank/150ms
+    # p99; simple_ondemand with polling_interval=10 (sampling was 0,
+    # i.e. off) = 7.4% jank/73ms, close to a pinned-max GPU (4.6%/61ms)
+    # without the battery cost. Mali-G52 node confirmed on real hardware.
+    write /sys/class/devfreq/13040000.mali/governor simple_ondemand
+    write /sys/class/devfreq/13040000.mali/polling_interval 10
+
     # lamu: DAMON_RECLAIM (mm/damon/reclaim.c) finds anonymous pages that
     # have gone untouched for a while and proactively reclaims them before
     # real memory pressure hits. Ships disabled (static bool enabled =

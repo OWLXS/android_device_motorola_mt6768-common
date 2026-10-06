@@ -3,3 +3,10 @@ type vendor_sysfs_audio, fs_type, sysfs_type;
 
 # Fingerprint
 type vendor_sysfs_fingerprint, fs_type, sysfs_type;
+
+# GPU (Mali) devfreq governor -- generic sysfs type otherwise denies ALL
+# writes, including from vendor_init (confirmed via dmesg AVC denial on
+# the pre-A17 tree). Needed so init.mt6768.rc can set a responsive
+# governor instead of the slow MTK default ("dummy"), independent of any
+# ROM-specific GPU control UI.
+type vendor_sysfs_mali_devfreq, fs_type, sysfs_type;

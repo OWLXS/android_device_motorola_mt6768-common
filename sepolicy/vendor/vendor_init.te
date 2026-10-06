@@ -7,3 +7,8 @@ set_prop(vendor_init, vendor_fingerprint_prop)
 # dmesg avc denial, 04/10.
 allow vendor_init proc_touch_boost:dir r_dir_perms;
 allow vendor_init proc_touch_boost:file rw_file_perms;
+
+# lamu: init.mt6768.rc writes governor+polling_interval to the Mali GPU
+# devfreq node (generic sysfs type otherwise denies vendor_init writes).
+allow vendor_init vendor_sysfs_mali_devfreq:dir r_dir_perms;
+allow vendor_init vendor_sysfs_mali_devfreq:file rw_file_perms;
