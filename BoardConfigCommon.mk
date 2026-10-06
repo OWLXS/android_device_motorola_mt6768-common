@@ -114,11 +114,14 @@ BOARD_SYSTEM_EXTIMAGE_FILE_SYSTEM_TYPE := erofs
 BOARD_VENDORIMAGE_FILE_SYSTEM_TYPE := erofs
 BOARD_VENDOR_DLKMIMAGE_FILE_SYSTEM_TYPE := erofs
 
-# Compressao maxima (microLZMA, nivel 9) em todas as particoes erofs acima.
-# Precisa de CONFIG_EROFS_FS_ZIP_LZMA=y no kernel pra montar (decode mais
-# pesado que lz4hc, mas EROFS_FS_PCPU_KTHREAD_HIPRI ja roda em kthread
-# dedicado de alta prioridade, o que amortece o custo).
-BOARD_EROFS_COMPRESSOR := lzma,9
+# Compressao em todas as particoes erofs acima. lzma real foi descartado
+# (precisaria vendorizar liblzma/xz-utils como modulo Soong do zero, sem
+# precedente nessa arvore) e zstd tambem (kernel 6.6 desse fork nao tem
+# EROFS_FS_ZIP_ZSTD, precisaria backport de driver). lz4hc so afeta o
+# encoder (mkfs.erofs); o decode no device e o mesmo lz4 padrao, ja
+# suportado (EROFS_FS_ZIP tem default y no Kconfig) -- zero trabalho extra
+# de kernel/build-system, melhor razao de compressao que lz4 puro.
+BOARD_EROFS_COMPRESSOR := lz4hc,9
 
 TARGET_COPY_OUT_ODM := odm
 TARGET_COPY_OUT_ODM_DLKM := odm_dlkm
