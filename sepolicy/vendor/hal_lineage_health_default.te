@@ -1,0 +1,17 @@
+# lamu: ChargingControl (vendor.lineage.health-service.default, TOGGLE mode)
+# needs RW access to /sys/devices/platform/charger/enable_charger to
+# stop/resume charging (writing 0 stops it, writing 1 resumes it --
+# confirmed live on hardware, stable 15s+, battery/status flips to
+# "Not charging" and stays there). This is the real hardware charge
+# enable/disable (DEVICE_ATTR_RW(enable_charger) in mtk_charger.c,
+# platform device "charger"), not a power_supply class property.
+#
+# mtk-master-charger/input_current_limit (sysfs_batteryinfo type) was
+# tried first since it is RW and DAC-reachable with just a chown, but it
+# does NOT actually work for this: the charger algorithm thread folds it
+# into its own current calculation every cycle and silently reverts an
+# external write of 0 back to the previous value within ~1s -- looks
+# like a success (write succeeds, no error), charging never actually
+# stops. enable_charger does not have this problem: it directly calls
+# charger_dev_enable() and the algorithm thread respects the flag.
+allow hal_lineage_health_default vendor_sysfs_mtk_charger_enable:file rw_file_perms;

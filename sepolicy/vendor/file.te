@@ -10,3 +10,14 @@ type vendor_sysfs_fingerprint, fs_type, sysfs_type;
 # governor instead of the slow MTK default ("dummy"), independent of any
 # ROM-specific GPU control UI.
 type vendor_sysfs_mali_devfreq, fs_type, sysfs_type;
+
+# Charging control toggle (vendor.lineage.health-service.default) --
+# /sys/devices/platform/charger/enable_charger is the real hardware
+# charge enable/disable. Confirmed live on hardware (10/10): holds state
+# 15s+ stable, battery/status flips to "Not charging" and stays there.
+# The power_supply input_current_limit node (sysfs_batteryinfo, tried
+# first) does NOT work for this: it is just one input the charger
+# algorithm thread folds into its own current calculation every cycle,
+# so a write of 0 (meant as "disable") gets silently overwritten back
+# to the previous value within ~1s -- looks like it worked, does not.
+type vendor_sysfs_mtk_charger_enable, fs_type, sysfs_type;
