@@ -156,8 +156,8 @@ on boot && property:ro.boot.product.hardware.sku=nfc_ss
 on boot && property:ro.boot.product.hardware.sku=nfc_dsds
     enable vendor.nfc_hal_service
 
-on boot && property:ro.boot.product.hardware.sku=nonfc_ss
-    stop mtk_secure_element_hal_service
+on boot && property:ro.boot.product.hardware.sku=nfc_ss
+    start mtk_secure_element_hal_service
 
-on boot && property:ro.boot.product.hardware.sku=nonfc_dsds
-    stop mtk_secure_element_hal_service
+on boot && property:ro.boot.product.hardware.sku=nfc_dsds
+    start mtk_secure_element_hal_service

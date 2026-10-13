@@ -36,6 +36,8 @@ lib_fixups: lib_fixups_user_type = {
 }
 
 blob_fixups: blob_fixups_user_type = {
+    'vendor/etc/init/android.hardware.secure_element@1.2-service-mediatek.rc': blob_fixup()
+        .regex_replace('class hal', 'class hal\n    disabled'),
     'system_ext/bin/hw/android.hardware.audio.parameter_parser.service': blob_fixup()
         .replace_needed('av-audio-types-aidl-V1-ndk.so', 'av-audio-types-aidl-V3-ndk.so'),
     'system_ext/lib64/libimsma.so': blob_fixup()
